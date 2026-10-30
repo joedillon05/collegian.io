@@ -94,9 +94,11 @@ B 3.0, B- 2.7, C+ 2.3, C 2.0, C- 1.7, D+ 1.3, D 1.0, D- 0.7, F 0.
 
 - `src/data/schools.ts`: every NCAA D1 school (365) with aliases, abbreviations
   and mascots; non-D1 schools added only when an athlete needs them.
-- `src/data/athletes.ts`: ~110 verified sample athletes across all tiers.
-- `scripts/import-wikidata.ts` + `data/README.md`: pipeline to 2,000 curated
-  athletes (Wikidata seed → curation CSV → generated pool).
+- `data/curation.csv` → `npm run build:pool` → `src/data/athletes.generated.ts`.
+  About 1,500 rows drafted so far (all `verified = claude`, awaiting a human
+  pass); target is 2,000 human-verified. See `data/README.md`.
+- `scripts/import-wikidata.ts` seeds new candidate names from Wikidata (CC0);
+  it needs network access to query.wikidata.org.
 - No photos, no logos. School colors may be used for accents later.
 
 ## 7. Architecture
@@ -120,7 +122,7 @@ daily_puzzle_items, players, plays, play_answers
 |---|---|---|
 | 0 | Scaffold: Next.js, Tailwind, fonts, tests | done |
 | 1 | Playable prototype: engine, autocomplete, timer, skip rules, ladder, scenes, grade/GPA, share, practice | done |
-| 2 | Data: run the Wikidata import, curate to 500 then 2,000 athletes, add non-D1 schools as needed | next |
+| 2 | Data: curation pipeline built, ~1,500 rows drafted; human verification pass and Wikidata seeding for the last 500 | in progress |
 | 3 | Backend: Postgres, daily publish + review, server validation, anonymous players, leaderboard | |
 | 4 | Polish: commissioned pixel scenes, more SFX, OG share image, ad slot, analytics | |
 | 5 | Growth: archive of past days, SEO, domain launch | |

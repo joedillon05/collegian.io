@@ -1,16 +1,20 @@
 # Athlete data pipeline
 
-The game ships with a hand-verified sample pool in `src/data/athletes.ts`
-(about 110 athletes). The launch target is 2,000.
+The game ships the pool in `src/data/athletes.generated.ts`, built from
+`data/curation.csv` by `npm run build:pool`. The launch target is 2,000
+human-verified rows.
 
 ## Flow
 
 1. `scripts/import-wikidata.ts` pulls candidates from Wikidata into
    `data/candidates.csv` (not committed; regenerate as needed).
-2. Review candidates into `data/curation.csv`. Only rows with
-   `verified = yes` make it into the game.
-3. `scripts/build-pool.ts` (to be written with the database phase) validates
-   `curation.csv` against the schools list and emits the pool.
+2. Review candidates into `data/curation.csv`. Rows with `verified` blank
+   never ship; `claude` means the row was drafted from Claude's knowledge and
+   still needs a human check; `human` means someone verified it against the
+   source URL.
+3. `npm run build:pool` validates every row (slug ids, unique ids and names,
+   known school ids, tier 1-5, yes/no, m/f) and regenerates
+   `src/data/athletes.generated.ts`. Commit the generated file.
 
 ## curation.csv columns
 
@@ -26,7 +30,7 @@ The game ships with a hand-verified sample pool in `src/data/athletes.ts`
 | `tier` | 1 Prime Time, 2 Pro Ranks, 3 Legends & Pioneers, 4 Olympic Stage, 5 Deep Cuts |
 | `schools` | `;`-separated school ids from `src/data/schools.ts`. Every school where they played a game. |
 | `source` | URL you verified against |
-| `verified` | `yes` once a human has checked the row |
+| `verified` | `human`, `claude`, or blank (blank rows are excluded) |
 
 ## Rules of inclusion
 
@@ -35,3 +39,21 @@ The game ships with a hand-verified sample pool in `src/data/athletes.ts`
 - Any school where they played a game counts as a correct answer, JUCO included.
   Add non-D1 schools to the `OTHER` list in `src/data/schools.ts` as needed.
 - No photos, no logos. Names and facts only.
+
+## Current state
+
+The first ~1,500 rows were drafted by Claude in one pass without web access,
+so every row is marked `verified = claude`. Known soft spots to check first:
+
+- `active` for anyone who changed teams or retired during the 2025-26
+  seasons; it was set from knowledge as of mid-2026.
+- Jersey `number` for players who changed teams in 2025 (NBA rookies and
+  NFL free agents especially).
+- Tier placement is a judgment call; tiers 1 and 3 are the thinnest, so
+  promote fan-favorite tier 2 names into tier 1 as you review.
+- Transfers: a second school was added only when the athlete played games
+  there. JUCO and non-D1 stops were added to `src/data/schools.ts` only for
+  a handful of famous cases (Cam Newton, Jimmy Butler, Tyreek Hill...).
+
+Wikidata is a seed for *new* names, not a verifier: its `educated at` claim
+does not say whether the person competed for the school.

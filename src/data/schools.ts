@@ -406,6 +406,17 @@ const D1: Row[] = [
 // Non-D1 schools exist only because an athlete in the pool competed there.
 const OTHER: [Row, Division][] = [
   [["tyler-jc", "Tyler Junior College", "Tyler Junior College", "TX", ["Tyler JC", "Apaches"]], "JUCO"],
+  [["blinn-college", "Blinn College", "Blinn College", "TX", ["Blinn", "Buccaneers"]], "JUCO"],
+  [["butte-college", "Butte College", "Butte College", "CA", ["Butte", "Roadrunners"]], "JUCO"],
+  [["san-jacinto-college", "San Jacinto College", "San Jacinto College", "TX", ["San Jac", "Gators"]], "JUCO"],
+  [["southern-nevada", "College of Southern Nevada", "College of Southern Nevada", "NV", ["CSN", "Coyotes"]], "JUCO"],
+  [["pasadena-city-college", "Pasadena City College", "Pasadena City College", "CA", ["Pasadena JC", "Lancers"]], "JUCO"],
+  [["south-plains-college", "South Plains College", "South Plains College", "TX", ["South Plains", "Texans"]], "JUCO"],
+  [["garden-city-cc", "Garden City CC", "Garden City Community College", "KS", ["Garden City", "Broncbusters"]], "JUCO"],
+  [["southeastern-oklahoma-state", "Southeastern Oklahoma State", "Southeastern Oklahoma State University", "OK", ["SOSU", "Savage Storm"]], "NAIA"],
+  [["colorado-colorado-springs", "UCCS", "University of Colorado Colorado Springs", "CO", ["Colorado Colorado Springs", "Mountain Lions"]], "D2"],
+  [["west-alabama", "West Alabama", "University of West Alabama", "AL", ["UWA", "Tigers"]], "D2"],
+  [["cal-state-la", "Cal State LA", "California State University, Los Angeles", "CA", ["Cal State Los Angeles", "LA State", "Golden Eagles"]], "D2"],
 ];
 
 function toSchool(row: Row, division?: Division): School {
