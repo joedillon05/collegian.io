@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collegian — Coming Soon</title>
+<meta name="description" content="collegian.io is a daily college sports trivia game. An athlete appears, you type the college they went to. Coming soon.">
+<meta property="og:title" content="Collegian — Coming Soon">
+<meta property="og:description" content="A daily college sports trivia game. An athlete appears, you type the college. Coming soon.">
+<meta property="og:url" content="https://collegian.io/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b1030">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 48'%3E%3Cpath d='M32 4 62 18 32 32 2 18Z' fill='%23121212'/%3E%3Cpath d='M32 8 54 18 32 28 10 18Z' fill='%232a2a2a'/%3E%3Cpath d='M16 24v10q16 12 32 0V24L32 31Z' fill='%23121212'/%3E%3Cpath d='M62 18 60 34' stroke='%23ffcb05' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='37' r='4' fill='%23ffcb05'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #121212;
+    --paper: #fff8e7;
+    --maize: #ffcb05;
+    --muted: #5a5a5a;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    overflow: hidden;
+    background: #0b1030;
+    color: var(--ink);
+    font-family: 'VT323', 'Courier New', monospace;
+  }
+
+  /* Animated scene, rendered at low resolution and blurred by CSS. */
+  #bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+    filter: blur(9px) saturate(1.2);
+    transform: scale(1.08);
+  }
+  /* Vignette + faint CRT scanlines over the scene, under the card. */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 2px, transparent 2px 4px),
+      radial-gradient(ellipse at center, rgba(0,0,0,.05) 0%, rgba(0,0,0,.55) 100%);
+  }
+
+  .card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 580px;
+    padding: clamp(22px, 5vw, 40px) clamp(18px, 5vw, 36px);
+    background: var(--paper);
+    border: 4px solid var(--ink);
+    box-shadow: 10px 10px 0 var(--ink);
+    text-align: center;
+  }
+  .cap {
+    display: block;
+    margin: 0 auto 8px;
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  h1 {
+    margin: 10px 0 20px;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: clamp(17px, 4.6vw, 28px);
+    line-height: 1.45;
+    letter-spacing: 1px;
+  }
+  h1 span { color: var(--maize); text-shadow: 2px 2px 0 var(--ink); }
+  .msg {
+    margin: 0 0 10px;
+    min-height: 2.4em;
+    font-size: clamp(26px, 6.2vw, 40px);
+    line-height: 1.15;
+    cursor: pointer;
+    user-select: none;
+  }
+  .cursor {
+    display: inline-block;
+    width: .45em;
+    height: .9em;
+    margin-left: .12em;
+    vertical-align: -.08em;
+    background: var(--ink);
+    animation: blink 1s steps(1) infinite;
+  }
+  .sub {
+    margin: 0;
+    font-size: clamp(18px, 3.5vw, 22px);
+    line-height: 1.3;
+    color: var(--muted);
+  }
+  .foot {
+    margin: 22px 0 0;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes bob { 50% { transform: translateY(-4px); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cap, .cursor { animation: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="overlay" aria-hidden="true"></div>
+
+<main class="card">
+  <svg class="cap" viewBox="0 0 64 48" width="72" height="54" aria-hidden="true">
+    <path d="M32 4 L62 18 L32 32 L2 18 Z" fill="#121212"/>
+    <path d="M32 8 L54 18 L32 28 L10 18 Z" fill="#2a2a2a"/>
+    <path d="M16 24 V34 Q32 46 48 34 V24 L32 31 Z" fill="#121212"/>
+    <path d="M62 18 L60 34" stroke="#ffcb05" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <circle cx="60" cy="37" r="4" fill="#ffcb05"/>
+  </svg>
+  <h1>COLLEGIAN<span>.io</span></h1>
+  <p class="sr-only">Coming soon.</p>
+  <p class="msg" id="msg" aria-hidden="true"><span id="msg-text">Kickoff is coming soon.</span><span class="cursor"></span></p>
+  <p class="sub">An athlete appears. You type the college.<br>A new run every day.</p>
+  <p class="foot">COLLEGIAN.IO &middot; EST. 2026</p>
+</main>
+
+<script>
+(() => {
+  'use strict';
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const shuffle = arr => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  /* ---------------- Rotating messages ---------------- */
+  const MESSAGES = [
+    'Kickoff is coming soon.',
+    'Tip-off is coming soon.',
+    'First pitch is coming soon.',
+    'Puck drops soon.',
+    'Still in the locker room. Back soon.',
+    'Warming up in the bullpen.',
+    'The band is still tuning up.',
+    'Pardon our tailgate. Site opens soon.',
+    'Redshirting this season. Debut soon.',
+    'Season opener: TBA.',
+    "We're in a timeout. Play resumes soon.",
+    'Spring practice in progress.',
+    'Resurfacing the ice. Back soon.',
+    'The press box opens soon.',
+    'Film session in progress.',
+    'Two-minute drill. Almost there.',
+    'Still installing the playbook.',
+    'Our recruiting class signs soon.',
+    'Under review. Ruling coming soon.',
+    'Walk-on tryouts coming soon.',
+    'Pregame. Stay tuned.',
+    'Banners go up soon.',
+    'Pep rally in progress.',
+    'Orientation starts soon.',
+    'Enrollment opens soon.',
+    'The mascot is still getting dressed.',
+    'Lineup card posts soon.',
+    'Shootaround in progress.',
+    'Halftime. Second half coming soon.',
+    'Bye week. Back soon.',
+    'Starters take the field soon.',
+    'Running laps until launch.',
+    'Rushing the field... soon.',
+    'Chalk talk in progress. Back soon.',
+    'Selection Sunday is coming soon.',
+    'In the starting blocks.',
+    'Full-court press coming soon.',
+    'Stretching out. Game time soon.'
+  ];
+
+  const msgEl = document.getElementById('msg-text');
+  let order = shuffle(MESSAGES);
+  let idx = 0;
+  let timer = 0;
+
+  function typeIn(text, i) {
+    msgEl.textContent = text.slice(0, i);
+    if (i < text.length) {
+      timer = setTimeout(() => typeIn(text, i + 1), 38 + Math.random() * 40);
+    } else {
+      timer = setTimeout(() => eraseOut(text, text.length), 3000);
+    }
+  }
+  function eraseOut(text, i) {
+    msgEl.textContent = text.slice(0, i);
+    if (i > 0) {
+      timer = setTimeout(() => eraseOut(text, i - 1), 16);
+    } else {
+      timer = setTimeout(nextMessage, 260);
+    }
+  }
+  function nextMessage() {
+    idx = (idx + 1) % order.length;
+    if (idx === 0) order = shuffle(order);
+    typeIn(order[idx], 0);
+  }
+
+  if (reduceMotion) {
+    msgEl.textContent = order[0];
+  } else {
+    typeIn(order[0], 0);
+  }
+  // Tap the line to skip to the next message.
+  document.getElementById('msg').addEventListener('click', () => {
+    clearTimeout(timer);
+    if (reduceMotion) {
+      idx = (idx + 1) % order.length;
+      msgEl.textContent = order[idx];
+    } else {
+      nextMessage();
+    }
+  });
+
+  /* ---------------- Background scene ---------------- */
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  if (!ctx) return;
+
+  const PAL = ['#ffcb05', '#1b4f9c', '#c8102e', '#f4f4f4', '#1d9a4a', '#ff6a00', '#7a3fd4', '#00a3e0'];
+  const BALL_TYPES = ['football', 'basketball', 'baseball', 'soccer', 'tennis', 'volleyball',
+                      'softball', 'golf', 'puck', 'football', 'basketball', 'soccer'];
+  const BALL_R = { football: 8, basketball: 7.5, baseball: 5, soccer: 7, tennis: 4.5,
+                   volleyball: 6.5, softball: 6, golf: 3.2, puck: 5 };
+  const GRAVITY = 320;
+
+  let W = 360, H = 200, standsTop = 0, fieldTop = 0;
+  let stars = [], crowd = [], balls = [], confetti = [], sparks = [], towers = [];
+  let blimpX = 0, nextBurst = 1.2;
+  const score = { home: 14, guest: 10, clock: 611, q: 2, next: 7 };
+
+  function layout() {
+    const vw = Math.max(innerWidth, 320), vh = Math.max(innerHeight, 320);
+    // Landscape renders 360 units wide; portrait uses fewer so balls and
+    // crowd dots are still a readable size once scaled up on a phone.
+    W = vw >= vh ? 360 : 180;
+    H = Math.max(180, Math.min(900, Math.round(W * vh / vw)));
+    canvas.width = W;
+    canvas.height = H;
+    standsTop = H * 0.56;
+    fieldTop = H * 0.78;
+
+    stars = Array.from({ length: 70 }, () => ({
+      x: rnd(0, W), y: rnd(0, standsTop * 0.8), p: rnd(0, 6.28), s: rnd(1, 3)
+    }));
+
+    crowd = [];
+    const cols = Math.ceil(W / 5), rows = 7, rowH = (fieldTop - standsTop - 6) / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        crowd.push({ x: c * 5 + (r % 2) * 2.5, y: standsTop + 5 + r * rowH, c: pick(PAL), col: c / cols });
+      }
+    }
+
+    towers = [0.12, 0.5, 0.88].map(f => ({ x: W * f, top: H * 0.26 }));
+
+    if (balls.length) {
+      for (const b of balls) b.ground = fieldTop + 6 + b.depth * (H - fieldTop - 10);
+    } else {
+      spawnBalls();
+    }
+    confetti = Array.from({ length: 55 }, () => newConfetti(true));
+    blimpX = W + 70;
+  }
+
+  function spawnBalls() {
+    balls = BALL_TYPES.map(type => {
+      const depth = Math.random();
+      return {
+        type, depth,
+        x: rnd(0, W), y: rnd(H * 0.2, fieldTop),
+        vx: (Math.random() < 0.5 ? -1 : 1) * rnd(18, 44), vy: rnd(-80, 0),
+        rot: rnd(0, 6.28),
+        ground: fieldTop + 6 + depth * (H - fieldTop - 10),
+        s: 0.7 + depth * 0.6
+      };
+    });
+    balls.sort((a, b) => a.depth - b.depth);
+  }
+
+  function newConfetti(anywhere) {
+    return {
+      x: rnd(0, W), y: anywhere ? rnd(-H, H) : rnd(-24, -4),
+      vy: rnd(14, 34), sw: rnd(6, 26), ph: rnd(0, 6.28),
+      rot: rnd(0, 6.28), vr: rnd(-3, 3), c: pick(PAL), w: rnd(2, 4), h: rnd(1.2, 2.2)
+    };
+  }
+
+  function burst() {
+    const x = rnd(W * 0.1, W * 0.9), y = rnd(H * 0.06, H * 0.38), c = pick(PAL), n = 36;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * 6.2832 + rnd(-0.1, 0.1), sp = rnd(22, 58);
+      sparks.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rnd(1.1, 1.7), age: 0, c });
+    }
+  }
+
+  function ballRadius(b) { return BALL_R[b.type] * b.s; }
+
+  /* ---- step ---- */
+  function step(dt, t) {
+    for (const b of balls) {
+      if (b.type === 'puck') {
+        b.x += b.vx * 2.2 * dt;
+        b.y = b.ground - 2;
+        b.rot += 2 * dt;
+      } else {
+        const r = ballRadius(b);
+        b.vy += GRAVITY * dt;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        if (b.y + r > b.ground) {
+          b.y = b.ground - r;
+          b.vy = -Math.abs(b.vy) * 0.8;
+          if (-b.vy < 90) b.vy = -rnd(150, 260);
+        }
+        b.rot += (b.vx / r) * dt;
+      }
+      if (b.x < -24) b.x = W + 24; else if (b.x > W + 24) b.x = -24;
+    }
+
+    for (const p of confetti) {
+      p.y += p.vy * dt;
+      p.x += Math.sin(t * 2 + p.ph) * p.sw * dt;
+      p.rot += p.vr * dt;
+      if (p.y > H + 6) Object.assign(p, newConfetti(false));
+    }
+
+    for (const s of sparks) {
+      s.age += dt;
+      s.vy += 28 * dt;
+      s.vx *= 0.985;
+      s.vy *= 0.985;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+    }
+    sparks = sparks.filter(s => s.age < s.life);
+    nextBurst -= dt;
+    if (nextBurst <= 0) { burst(); nextBurst = rnd(2.5, 6.5); }
+
+    blimpX -= 6 * dt;
+    if (blimpX < -70) blimpX = W + 70;
+
+    score.clock -= dt;
+    if (score.clock <= 0) { score.clock = 720; score.q = score.q % 4 + 1; }
+    score.next -= dt;
+    if (score.next <= 0) {
+      score.next = rnd(6, 16);
+      score[Math.random() < 0.5 ? 'home' : 'guest'] += pick([3, 7, 7, 6, 2]);
+    }
+  }
+
+  /* ---- draw ---- */
+  function drawSky(t) {
+    const g = ctx.createLinearGradient(0, 0, 0, standsTop);
+    g.addColorStop(0, '#070c2a');
+    g.addColorStop(0.55, '#2b1b5e');
+    g.addColorStop(1, '#b8452a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, standsTop + 2);
+    ctx.fillStyle = '#fff';
+    for (const s of stars) {
+      ctx.globalAlpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(t * s.s + s.p));
+      ctx.fillRect(s.x, s.y, 1.3, 1.3);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawPennants(t) {
+    ctx.strokeStyle = '#e8e8e8';
+    ctx.lineWidth = 1;
+    const y0 = H * 0.05 + 4;
+    ctx.beginPath();
+    ctx.moveTo(0, y0);
+    ctx.quadraticCurveTo(W / 2, y0 + 10, W, y0);
+    ctx.stroke();
+    const n = Math.ceil(W / 16);
+    for (let i = 0; i < n; i++) {
+      const x = i * 16 + 8, u = x / W, y = y0 + 20 * u * (1 - u);
+      ctx.fillStyle = PAL[i % PAL.length];
+      ctx.beginPath();
+      ctx.moveTo(x - 6, y);
+      ctx.lineTo(x + 6, y);
+      ctx.lineTo(x + Math.sin(t * 3 + i) * 2.5, y + 10);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function drawBlimp(t) {
+    const y = H * 0.14 + Math.sin(t * 0.7) * 2;
+    ctx.fillStyle = '#cfd3dc';
+    ctx.beginPath();
+    ctx.ellipse(blimpX, y, 24, 8, 0, 0, 6.2832);
+    ctx.fill();
+    ctx.fillStyle = '#c8102e';
+    ctx.fillRect(blimpX - 10, y - 3, 20, 6);
+    ctx.fillStyle = '#555';
+    ctx.fillRect(blimpX - 4, y + 7, 8, 3);
+    if (Math.floor(t * 2) % 2 === 0) {
+      ctx.fillStyle = '#ff4040';
+      ctx.fillRect(blimpX + 22, y - 1, 2, 2);
+    }
+  }
+
+  function drawSparks() {
+    for (const s of sparks) {
+      ctx.globalAlpha = Math.max(0, 1 - s.age / s.life);
+      ctx.fillStyle = s.c;
+      ctx.fillRect(s.x, s.y, 2.5, 2.5);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function drawScoreboard() {
+    const w = 58, h = 40, x = Math.round(W * 0.69 - w / 2), y = H * 0.05 + 24;
+    ctx.fillStyle = '#141414';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#4a4a4a';
+    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.font = 'bold 9px monospace';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#ffb300';
+    ctx.fillText('HOME  ' + pad(score.home), x + 5, y + 4);
+    ctx.fillText('GUEST ' + pad(score.guest), x + 5, y + 15);
+    ctx.fillStyle = '#ff3b3b';
+    const m = Math.floor(score.clock / 60), s = Math.floor(score.clock % 60);
+    ctx.fillText(pad(m) + ':' + pad(s) + ' Q' + score.q, x + 5, y + 27);
+  }
+
+  function drawStands(t) {
+    for (const tw of towers) {
+      const g = ctx.createRadialGradient(tw.x, tw.top, 2, tw.x, tw.top, 70);
+      const f = 0.32 + 0.05 * Math.sin(t * 7 + tw.x);
+      g.addColorStop(0, 'rgba(255,240,190,' + f + ')');
+      g.addColorStop(1, 'rgba(255,240,190,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(tw.x - 70, tw.top - 70, 140, 140);
+    }
+    ctx.fillStyle = '#1a1630';
+    ctx.fillRect(0, standsTop, W, fieldTop - standsTop);
+
+    const wavePos = ((t * 0.22) % 1.5) - 0.25;
+    for (const p of crowd) {
+      const d = Math.abs(p.col - wavePos);
+      const bump = d < 0.07 ? Math.cos((d / 0.07) * 1.5708) * 4 : 0;
+      ctx.fillStyle = p.c;
+      ctx.fillRect(p.x, p.y - bump, 3, 3);
+    }
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 3; i++) {
+      if (Math.random() < 0.5) ctx.fillRect(rnd(0, W), rnd(standsTop, fieldTop), 2.5, 2.5);
+    }
+    for (const tw of towers) {
+      ctx.fillStyle = '#2c2c3a';
+      ctx.fillRect(tw.x - 1.5, tw.top, 3, standsTop - tw.top + 4);
+      ctx.fillStyle = '#fff7dc';
+      ctx.fillRect(tw.x - 9, tw.top - 3, 18, 6);
+    }
+  }
+
+  function drawField(t) {
+    ctx.fillStyle = '#1f7a3a';
+    ctx.fillRect(0, fieldTop, W, H - fieldTop);
+    const off = (t * 9) % 48;
+    ctx.fillStyle = '#1b6a33';
+    for (let x = -48 - off; x < W + 48; x += 48) ctx.fillRect(x, fieldTop, 24, H - fieldTop);
+    ctx.fillStyle = 'rgba(255,255,255,.85)';
+    for (let x = -48 - off; x < W + 48; x += 24) ctx.fillRect(x, fieldTop, 1, H - fieldTop);
+    ctx.fillRect(0, fieldTop, W, 1.5);
+  }
+
+  function drawBall(b) {
+    const r = ballRadius(b);
+    const circle = fill => {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, 6.2832);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.35)';
+      ctx.stroke();
+    };
+    const stitches = color => {
+      ctx.strokeStyle = color;
+      ctx.beginPath(); ctx.arc(-r * 1.1, 0, r * 0.9, -1.1, 1.1); ctx.stroke();
+      ctx.beginPath(); ctx.arc(r * 1.1, 0, r * 0.9, 2.04, 4.24); ctx.stroke();
+    };
+    const wedge = (a0, a1) => {
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r, a0, a1); ctx.closePath(); ctx.fill();
+    };
+
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.rot);
+    ctx.lineWidth = 1;
+    switch (b.type) {
+      case 'football':
+        ctx.fillStyle = '#8a4b22';
+        ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.62, 0, 0, 6.2832); ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.beginPath(); ctx.moveTo(-r * 0.4, 0); ctx.lineTo(r * 0.4, 0); ctx.stroke();
+        for (let i = -1; i <= 1; i++) {
+          ctx.beginPath(); ctx.moveTo(i * r * 0.2, -r * 0.2); ctx.lineTo(i * r * 0.2, r * 0.2); ctx.stroke();
+        }
+        break;
+      case 'basketball':
+        circle('#e8702a');
+        ctx.strokeStyle = '#2a1a0f';
+        ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.moveTo(0, -r); ctx.lineTo(0, r); ctx.stroke();
+        stitches('#2a1a0f');
+        break;
+      case 'baseball': circle('#f6f6f6'); stitches('#c8102e'); break;
+      case 'softball': circle('#f2e33a'); stitches('#c8102e'); break;
+      case 'tennis': circle('#d5f531'); stitches('#fff'); break;
+      case 'soccer':
+        circle('#f6f6f6');
+        ctx.fillStyle = '#111';
+        for (const [x, y] of [[0, 0], [r * .6, -r * .45], [-r * .6, -r * .45], [0, r * .7]]) {
+          ctx.beginPath(); ctx.arc(x, y, r * 0.22, 0, 6.2832); ctx.fill();
+        }
+        break;
+      case 'volleyball':
+        circle('#f6f6f6');
+        ctx.fillStyle = '#1f5fbf'; wedge(0, 2.1);
+        ctx.fillStyle = '#f2c200'; wedge(2.1, 4.2);
+        break;
+      case 'golf': circle('#ffffff'); break;
+      case 'puck':
+        ctx.fillStyle = '#111';
+        ctx.fillRect(-r, -r * 0.4, r * 2, r * 0.8);
+        break;
+    }
+    ctx.restore();
+  }
+
+  function drawConfetti() {
+    for (const p of confetti) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+  }
+
+  function draw(t) {
+    drawSky(t);
+    drawPennants(t);
+    drawBlimp(t);
+    drawSparks();
+    drawScoreboard();
+    drawStands(t);
+    drawField(t);
+    for (const b of balls) drawBall(b);
+    drawConfetti();
+  }
+
+  /* ---- loop ---- */
+  let last = 0, t = 0, resizeTimer = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (now - last < 32) return; // cap near 30 fps; the CSS blur is the expensive part
+    const dt = Math.min((now - last) / 1000, 0.08);
+    last = now;
+    t += dt;
+    step(dt, t);
+    draw(t);
+  }
+
+  layout();
+  addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { layout(); if (reduceMotion) draw(t); }, 150);
+  });
+
+  if (reduceMotion) {
+    // Settle the scene, then paint a single still frame.
+    for (let i = 0; i < 150; i++) { t += 1 / 30; step(1 / 30, t); }
+    burst(); burst();
+    for (let i = 0; i < 12; i++) { t += 1 / 30; step(1 / 30, t); }
+    draw(t);
+  } else {
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
