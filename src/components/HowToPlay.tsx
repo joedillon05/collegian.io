@@ -26,7 +26,11 @@ export default function HowToPlay({ onClose }: { onClose: () => void }) {
           Points and correct answers carry you from <b>Orientation</b> to <b>Valedictorian</b>. Every day you get a
           grade and your <b>GPA</b> tracks your run.
         </li>
-        <li>New puzzle every day at midnight Eastern. One scored attempt a day. Practice as much as you like.</li>
+        <li>
+          <b>Sport modes</b> use the same rules inside one sport. The five levels ramp by how well-known the athlete
+          is within that sport, from household names to deep cuts. Each mode has its own daily puzzle.
+        </li>
+        <li>New puzzles every day at midnight Eastern. One scored attempt per mode per day. Practice as much as you like.</li>
       </ol>
       <div className="mt-4 flex justify-end">
         <button className="px-btn" onClick={onClose}>

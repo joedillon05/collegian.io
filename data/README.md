@@ -27,7 +27,8 @@ human-verified rows.
 | `number` | jersey number as displayed, blank for sports without one |
 | `active` | `yes` / `no`. Re-check every season. |
 | `gender` | `m` / `f` (used only for the two-women-per-day cap) |
-| `tier` | 1 Prime Time, 2 Pro Ranks, 3 Legends & Pioneers, 4 Olympic Stage, 5 Deep Cuts |
+| `tier` | Classic-mode difficulty: 1 Prime Time, 2 Pro Ranks, 3 Legends & Pioneers, 4 Olympic Stage, 5 Deep Cuts |
+| `fame` | Within-sport fame for sport modes: 1 household name, 2 every fan knows, 3 regulars, 4 diehards, 5 deep cut |
 | `schools` | `;`-separated school ids from `src/data/schools.ts`. Every school where they played a game. |
 | `source` | URL you verified against |
 | `verified` | `human`, `claude`, or blank (blank rows are excluded) |
@@ -51,6 +52,8 @@ so every row is marked `verified = claude`. Known soft spots to check first:
   NFL free agents especially).
 - Tier placement is a judgment call; tiers 1 and 3 are the thinnest, so
   promote fan-favorite tier 2 names into tier 1 as you review.
+- `fame` was seeded from the tier plus per-sport overrides in one pass. It
+  only matters relative to the same sport, so review it sport by sport.
 - Transfers: a second school was added only when the athlete played games
   there. JUCO and non-D1 stops were added to `src/data/schools.ts` only for
   a handful of famous cases (Cam Newton, Jimmy Butler, Tyreek Hill...).

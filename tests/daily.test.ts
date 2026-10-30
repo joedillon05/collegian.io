@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { dailyPuzzle, practicePuzzle, puzzleNumberFor, etDateString, msUntilNextPuzzle, generateItems, mulberry32 } from "@/lib/daily";
 import { ATHLETES } from "@/data/athletes";
+import { MODES, modeStatus, poolForMode, levelMapFor, isClassic } from "@/lib/modes";
 import { SCHOOL_BY_ID } from "@/data/schools";
 
 describe("daily puzzle", () => {
@@ -43,14 +44,16 @@ describe("daily puzzle", () => {
     expect(ms).toBeLessThanOrEqual(60 * 60_000);
   });
   it("practice puzzles are valid too", () => {
-    expect(practicePuzzle(ATHLETES, 42).items).toHaveLength(15);
+    expect(practicePuzzle(ATHLETES, MODES[0], 42).items).toHaveLength(15);
   });
 });
 
 describe("athlete data integrity", () => {
-  it("every athlete school id exists", () => {
+  it("every athlete school id exists and fame is set", () => {
     for (const a of ATHLETES) {
       expect(a.schools.length).toBeGreaterThan(0);
+      expect(a.fame).toBeGreaterThanOrEqual(1);
+      expect(a.fame).toBeLessThanOrEqual(5);
       for (const s of a.schools) expect(SCHOOL_BY_ID.has(s), `${a.name}: ${s}`).toBe(true);
     }
   });
@@ -61,5 +64,55 @@ describe("athlete data integrity", () => {
     for (const t of [1, 2, 3, 4, 5]) {
       expect(ATHLETES.filter((a) => a.tier === t).length).toBeGreaterThanOrEqual(6);
     }
+  });
+});
+
+describe("sport modes", () => {
+  it("every offered mode generates a valid 15-athlete daily with 3 per level", () => {
+    for (const mode of MODES) {
+      const status = modeStatus(mode, ATHLETES);
+      if (!status.available) continue;
+      const p = dailyPuzzle(ATHLETES, "2026-11-03", mode);
+      expect(p.items).toHaveLength(15);
+      expect(p.mode).toBe(mode.id);
+      expect(p.items.map((i) => i.tier)).toEqual([1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5]);
+      if (mode.sports) for (const it of p.items) expect(mode.sports).toContain(it.athlete.sport);
+    }
+  });
+  it("classic, football and basketball are available with the current pool", () => {
+    for (const id of ["classic", "football", "basketball", "golf", "track", "swimming", "hockey", "baseball", "soccer", "olympic"]) {
+      const mode = MODES.find((m) => m.id === id)!;
+      expect(modeStatus(mode, ATHLETES).available, id).toBe(true);
+    }
+  });
+  it("sport-mode levels are fame quantiles in fame order", () => {
+    const mode = MODES.find((m) => m.id === "golf")!;
+    const pool = poolForMode(mode, ATHLETES);
+    const levels = levelMapFor(mode, pool);
+    for (const a of pool) for (const b of pool) {
+      if (a.fame < b.fame) expect(levels.get(a.id)!).toBeLessThanOrEqual(levels.get(b.id)!);
+    }
+    const counts = [1, 2, 3, 4, 5].map((l) => pool.filter((a) => levels.get(a.id) === l).length);
+    expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+  });
+  it("classic levels are the cross-sport tiers", () => {
+    const classic = MODES[0];
+    expect(isClassic(classic)).toBe(true);
+    const levels = levelMapFor(classic, ATHLETES);
+    for (const a of ATHLETES.slice(0, 50)) expect(levels.get(a.id)).toBe(a.tier);
+  });
+  it("classic daily seed is unchanged by the mode system", () => {
+    const a = dailyPuzzle(ATHLETES, "2026-11-01").items.map((i) => i.athlete.id);
+    const b = dailyPuzzle(ATHLETES, "2026-11-01", MODES[0]).items.map((i) => i.athlete.id);
+    expect(a).toEqual(b);
+  });
+  it("soccer mode has no women cap", () => {
+    const soccer = MODES.find((m) => m.id === "soccer")!;
+    let maxWomen = 0;
+    for (let seed = 0; seed < 60; seed++) {
+      const items = practicePuzzle(ATHLETES, soccer, seed).items;
+      maxWomen = Math.max(maxWomen, items.filter((i) => i.athlete.gender === "f").length);
+    }
+    expect(maxWomen).toBeGreaterThan(2);
   });
 });

@@ -4,18 +4,12 @@ import { useEffect, useState } from "react";
 import type { PuzzleItem } from "@/lib/types";
 import { ITEMS_PER_GAME } from "@/lib/engine";
 
-export const TIER_NAMES: Record<number, string> = {
-  1: "PRIME TIME",
-  2: "PRO RANKS",
-  3: "LEGENDS & PIONEERS",
-  4: "OLYMPIC STAGE",
-  5: "DEEP CUTS",
-};
-
 interface Props {
   item: PuzzleItem;
   deferred: boolean;
   answered: number;
+  /** e.g. "TIER 2 · PRO RANKS" or "LEVEL 4 · DIEHARDS ONLY" */
+  levelLabel: string;
 }
 
 function useTypewriter(text: string, speed = 28): string {
@@ -33,7 +27,7 @@ function useTypewriter(text: string, speed = 28): string {
   return text.slice(0, n);
 }
 
-export default function ClueCard({ item, deferred, answered }: Props) {
+export default function ClueCard({ item, deferred, answered, levelLabel }: Props) {
   const { athlete } = item;
   const typed = useTypewriter(athlete.name);
   return (
@@ -42,9 +36,7 @@ export default function ClueCard({ item, deferred, answered }: Props) {
         <span>
           ATHLETE {Math.min(answered + 1, ITEMS_PER_GAME)}/{ITEMS_PER_GAME}
         </span>
-        <span>
-          TIER {item.tier} · {TIER_NAMES[item.tier]}
-        </span>
+        <span>{levelLabel}</span>
       </div>
       {deferred && (
         <div className="absolute -top-3 right-3 border-2 border-[#15152a] bg-[#ffd23f] px-2 py-1 font-pixel text-[9px]">

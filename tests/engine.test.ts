@@ -6,7 +6,7 @@ import {
 import type { Athlete, Puzzle, PuzzleItem, Tier } from "@/lib/types";
 
 function athlete(id: string, tier: Tier, schools: string[] = [`${id}-u`]): Athlete {
-  return { id, name: id, sport: "Football", number: "1", active: true, gender: "m", tier, schools };
+  return { id, name: id, sport: "Football", number: "1", active: true, gender: "m", tier, fame: tier, schools };
 }
 
 function puzzle(): Puzzle {
@@ -18,7 +18,7 @@ function puzzle(): Puzzle {
       items.push({ athlete: a, tier, position: pos++ });
     }
   }
-  return { id: "test", mode: "practice", items };
+  return { id: "test", kind: "practice", mode: "classic", items };
 }
 
 const T0 = 1_000_000;

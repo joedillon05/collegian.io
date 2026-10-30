@@ -6,6 +6,7 @@ import {
 } from "@/lib/engine";
 import { STAGES } from "@/lib/stages";
 import { schoolName } from "@/data/schools";
+import { isClassic, levelLabel, type ModeDef } from "@/lib/modes";
 import { sfx } from "@/lib/sfx";
 import ClueCard from "./ClueCard";
 import TimerBar from "./TimerBar";
@@ -14,6 +15,7 @@ import SceneLayer from "./SceneLayer";
 
 interface Props {
   state: GameState;
+  mode: ModeDef;
   dispatch: (a: GameAction) => void;
   sound: boolean;
   onToggleSound: () => void;
@@ -27,7 +29,7 @@ interface Fx<T> {
   value: T;
 }
 
-export default function Game({ state, dispatch, sound, onToggleSound, onHelp, onStats, onExit }: Props) {
+export default function Game({ state, mode, dispatch, sound, onToggleSound, onHelp, onStats, onExit }: Props) {
   const [now, setNow] = useState(() => Date.now());
   const [flash, setFlash] = useState<Fx<"correct" | "wrong"> | null>(null);
   const [pop, setPop] = useState<Fx<string> | null>(null);
@@ -138,7 +140,10 @@ export default function Game({ state, dispatch, sound, onToggleSound, onHelp, on
             ◀ COLLEGIAN
           </button>
           <div className="text-center">
-            <div className="font-pixel text-[8px] text-[#9ea3b5]">{state.puzzle.mode === "daily" ? `#${state.puzzle.number}` : "PRACTICE"}</div>
+            <div className="font-pixel text-[8px] text-[#9ea3b5]">
+              {state.puzzle.kind === "daily" ? `#${state.puzzle.number}` : "PRACTICE"}
+              {!isClassic(mode) && ` · ${mode.short.toUpperCase()}`}
+            </div>
             <div className="font-pixel text-xs sm:text-sm">{state.points.toLocaleString("en-US")} PTS</div>
           </div>
           <div className="flex items-center gap-1">
@@ -162,7 +167,7 @@ export default function Game({ state, dispatch, sound, onToggleSound, onHelp, on
         </div>
 
         <div className="relative">
-          <ClueCard item={item} deferred={entry.deferred} answered={answered} />
+          <ClueCard item={item} deferred={entry.deferred} answered={answered} levelLabel={levelLabel(mode, item.tier)} />
           {pop && (
             <div key={pop.id} className="anim-pop pointer-events-none absolute right-4 top-2 font-pixel text-2xl text-[#2dd36f] drop-shadow-[2px_2px_0_#15152a]">
               {pop.value}

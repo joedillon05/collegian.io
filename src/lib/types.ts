@@ -28,23 +28,29 @@ export interface Athlete {
   number: string | null;
   active: boolean;
   gender: Gender;
+  /** Cross-sport difficulty used by Classic mode: 1 NFL/NBA stars ... 5 deep cuts. */
   tier: Tier;
+  /** Within-sport fame used by sport modes: 1 household name ... 5 deep cut. */
+  fame: Tier;
   /** Every school where the athlete competed. Any of them is a correct answer. */
   schools: string[];
 }
 
 export interface PuzzleItem {
   athlete: Athlete;
+  /** Difficulty level 1-5 for this item (tier in Classic, fame bucket in sport modes). Drives points. */
   tier: Tier;
   /** 0-based position in the day's order. */
   position: number;
 }
 
-export type GameMode = "daily" | "practice";
+export type PuzzleKind = "daily" | "practice";
 
 export interface Puzzle {
   id: string;
-  mode: GameMode;
+  kind: PuzzleKind;
+  /** Game mode id, e.g. "classic" or "football". */
+  mode: string;
   /** ET calendar date, YYYY-MM-DD. Daily only. */
   dateET?: string;
   /** 1-based puzzle number since launch. Daily only. */

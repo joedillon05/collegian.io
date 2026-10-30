@@ -4,6 +4,7 @@ import Modal from "./Modal";
 import { type HistoryEntry, currentStreak, maxStreak } from "@/lib/storage";
 import { formatGpa, gpaOf } from "@/lib/grading";
 import { STAGES } from "@/lib/stages";
+import { MODES } from "@/lib/modes";
 
 interface Props {
   history: HistoryEntry[];
@@ -26,6 +27,27 @@ export default function StatsModal({ history, todayET, onClose }: Props) {
         <Stat label="AVG SCORE" value={avg.toLocaleString("en-US")} />
         <Stat label="BEST STAGE" value={history.length ? STAGES[best].name : "--"} small />
       </div>
+      {history.length > 0 && (
+        <>
+          <h3 className="mb-1 mt-4 font-pixel text-[10px] text-[#6c6a62]">COURSES</h3>
+          <table className="w-full">
+            <tbody>
+              {MODES.filter((m) => history.some((h) => h.mode === m.id)).map((m) => {
+                const rows = history.filter((h) => h.mode === m.id);
+                const best = rows.reduce((x, h) => Math.max(x, h.stage), 0);
+                return (
+                  <tr key={m.id} className="border-t-2 border-dashed border-[#bdb59b]">
+                    <td className="py-1">{m.name}</td>
+                    <td className="py-1 text-right">{rows.length} day{rows.length === 1 ? "" : "s"}</td>
+                    <td className="py-1 text-right text-[#6c6a62]">{STAGES[best].name}</td>
+                    <td className="py-1 text-right font-pixel text-xs">{formatGpa(gpaOf(rows.map((h) => h.gpa)))}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </>
+      )}
       <h3 className="mb-1 mt-4 font-pixel text-[10px] text-[#6c6a62]">RECENT GRADES</h3>
       {recent.length === 0 ? (
         <p>No daily games yet. Play today&apos;s puzzle to start your transcript.</p>
@@ -33,9 +55,9 @@ export default function StatsModal({ history, todayET, onClose }: Props) {
         <table className="w-full">
           <tbody>
             {recent.map((h) => (
-              <tr key={h.dateET} className="border-t-2 border-dashed border-[#bdb59b]">
+              <tr key={`${h.mode}-${h.dateET}`} className="border-t-2 border-dashed border-[#bdb59b]">
                 <td className="py-1">#{h.number}</td>
-                <td className="py-1 text-[#6c6a62]">{h.dateET}</td>
+                <td className="py-1 text-[#6c6a62]">{h.dateET}{h.mode !== "classic" ? ` · ${MODES.find((m) => m.id === h.mode)?.short ?? h.mode}` : ""}</td>
                 <td className="py-1 text-right">{h.points.toLocaleString("en-US")}</td>
                 <td className="py-1 text-right">{h.correct}/15</td>
                 <td className="py-1 text-right font-pixel text-xs">{h.grade}</td>

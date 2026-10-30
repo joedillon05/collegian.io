@@ -52,6 +52,34 @@ sprite confetti, CRT scanlines and optional chiptune SFX).
 | Accounts | None. Anonymous device token. |
 | Ads | Planned. Leave room in the layout. |
 
+## 2b. Sport modes (locked)
+
+Same loop, one sport. Each mode has its own daily puzzle (seeded by mode
+and ET date), its own scored attempt, and unlimited practice. The five
+levels ramp by **within-sport fame** instead of by sport type:
+
+| Level | Name | Meaning |
+|---|---|---|
+| 1 | Household | casual fans know them |
+| 2 | Every fan | anyone who follows the sport |
+| 3 | Regulars | regular followers |
+| 4 | Diehards | serious fans |
+| 5 | Deep cuts | trivia-night material |
+
+Every athlete carries a `fame` (1-5) alongside the Classic `tier`. A sport
+mode sorts its pool by fame and cuts it into five equal buckets, so every
+level always has players and the ramp tightens as the pool grows. A mode is
+offered once its pool has 45+ athletes; until then it shows as "soon".
+
+Modes today: Classic, Football, Basketball (NBA + WNBA, women capped at 2 a
+day like Classic), Baseball, Hockey, Soccer (no women cap), Golf, Track &
+Field (no cap), Swimming & Diving (no cap), Olympic & More (gymnastics,
+wrestling, tennis, lacrosse, volleyball, softball, fencing, water polo and
+other small pools, no cap). Deep link: `?mode=football`.
+
+The transcript treats each mode as a course: cumulative GPA plus per-mode
+GPA, days played and best stage.
+
 ## 3. Progression ladder (locked)
 
 Both thresholds must be met.

@@ -8,10 +8,11 @@ import { shareText } from "@/lib/share";
 import { schoolName } from "@/data/schools";
 import { msUntilNextPuzzle } from "@/lib/daily";
 import SceneLayer from "./SceneLayer";
-import { TIER_NAMES } from "./ClueCard";
+import { isClassic, levelName, type ModeDef } from "@/lib/modes";
 
 interface Props {
   state: GameState;
+  mode: ModeDef;
   gpa: number | null;
   streak: number;
   onPractice: () => void;
@@ -27,10 +28,10 @@ function fmtCountdown(ms: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
 
-export default function Results({ state, gpa, streak, onPractice, onHome, onStats }: Props) {
+export default function Results({ state, mode, gpa, streak, onPractice, onHome, onStats }: Props) {
   const grade = gradeForGame(state);
   const stage = STAGES[state.stage];
-  const isDaily = state.puzzle.mode === "daily";
+  const isDaily = state.puzzle.kind === "daily";
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(() => msUntilNextPuzzle());
   const [revealed, setRevealed] = useState(false);
@@ -71,11 +72,17 @@ export default function Results({ state, gpa, streak, onPractice, onHome, onStat
           <button onClick={onHome} className="font-pixel text-[10px] text-[#ffd23f] sm:text-xs">
             ◀ COLLEGIAN
           </button>
-          <span className="font-pixel text-[10px] sm:text-xs">{isDaily ? `#${state.puzzle.number} · ${state.puzzle.dateET}` : "PRACTICE"}</span>
+          <span className="font-pixel text-[10px] sm:text-xs">
+            {isDaily ? `#${state.puzzle.number} · ${state.puzzle.dateET}` : "PRACTICE"}
+            {!isClassic(mode) && ` · ${mode.short.toUpperCase()}`}
+          </span>
         </header>
 
         <section className={`px-panel px-4 py-4 text-center transition-transform duration-500 ${revealed ? "scale-100" : "scale-90"}`}>
-          <div className="font-pixel text-[9px] text-[#6c6a62]">{isDaily ? "FINAL STANDING" : "PRACTICE RESULT"}</div>
+          <div className="font-pixel text-[9px] text-[#6c6a62]">
+            {isDaily ? "FINAL STANDING" : "PRACTICE RESULT"}
+            {!isClassic(mode) && ` · ${mode.name.toUpperCase()}`}
+          </div>
           <h1 className="mt-2 font-pixel text-xl sm:text-3xl">{stage.name.toUpperCase()}</h1>
           <p className="mt-1 text-xl text-[#6c6a62]">{stage.caption}</p>
           <div className="mt-4 grid grid-cols-3 gap-2">
@@ -123,7 +130,7 @@ export default function Results({ state, gpa, streak, onPractice, onHome, onStat
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <span className="truncate font-pixel text-[10px] sm:text-xs">{item.athlete.name}</span>
-                      <span className="font-pixel text-[9px] text-[#6c6a62]">T{item.tier}</span>
+                      <span className="font-pixel text-[9px] text-[#6c6a62]">{isClassic(mode) ? "T" : "L"}{item.tier}</span>
                     </div>
                     <div className="flex items-baseline justify-between gap-2 text-lg leading-tight sm:text-xl">
                       <span className="truncate">
@@ -140,7 +147,7 @@ export default function Results({ state, gpa, streak, onPractice, onHome, onStat
             })}
           </ol>
           <p className="mt-2 text-lg text-[#6c6a62]">
-            Tiers: {Object.entries(TIER_NAMES).map(([t, n]) => `${t} ${n}`).join(" · ")}
+            {isClassic(mode) ? "Tiers" : "Levels"}: {[1, 2, 3, 4, 5].map((l) => `${l} ${levelName(mode, l)}`).join(" · ")}
           </p>
         </section>
       </div>

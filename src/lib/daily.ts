@@ -1,5 +1,6 @@
 import type { Athlete, Puzzle, PuzzleItem, Tier } from "./types";
 import { ITEMS_PER_TIER, TIERS } from "./engine";
+import { CLASSIC_MODE_ID, MODES, isClassic, levelMapFor, poolForMode, type ModeDef, type WomenBudget } from "./modes";
 
 /** Puzzle #1 is this ET calendar date. */
 export const LAUNCH_DATE_ET = "2026-10-30";
@@ -29,7 +30,6 @@ export function puzzleNumberFor(dateET: string): number {
 /** Milliseconds until the next ET midnight. */
 export function msUntilNextPuzzle(now: Date = new Date()): number {
   const today = etDateString(now);
-  // Walk forward in 15-minute steps until the ET date flips, then refine to the minute.
   let t = now.getTime();
   const step = 15 * 60_000;
   while (etDateString(new Date(t)) === today) t += step;
@@ -76,30 +76,32 @@ function shuffle<T>(arr: T[], rng: Rng): T[] {
 
 export interface GeneratorOptions {
   perTier?: number;
-  /** Hard cap on women in a single day's set. */
-  maxWomen?: number;
+  /** "classic": budget drawn 0/1/2 (1:2:1) and capped at 2. "none": no cap. */
+  womenBudget?: WomenBudget;
+  /** Difficulty level per athlete. Defaults to the cross-sport tier. */
+  levelOf?: (a: Athlete) => Tier;
   /** Athlete ids that must not appear (recent days). */
   exclude?: Set<string>;
 }
 
 /**
- * Pick ITEMS_PER_TIER athletes per tier, in tier order. Women are capped per
- * day (the day's budget is drawn as 0 / 1 / 2 with weights 1:2:1 and then
- * clamped to maxWomen) and no school appears twice in a day when avoidable.
+ * Pick ITEMS_PER_TIER athletes per level, in level order 1 → 5. No school
+ * appears twice in a day when avoidable.
  */
 export function generateItems(pool: Athlete[], rng: Rng, opts: GeneratorOptions = {}): PuzzleItem[] {
   const perTier = opts.perTier ?? ITEMS_PER_TIER;
+  const levelOf = opts.levelOf ?? ((a: Athlete) => a.tier);
   const roll = rng();
   const drawn = roll < 0.25 ? 0 : roll < 0.75 ? 1 : 2;
-  const womenBudget = Math.min(opts.maxWomen ?? 2, drawn);
+  const womenBudget = (opts.womenBudget ?? "classic") === "none" ? Infinity : drawn;
 
   const usedSchools = new Set<string>();
-  const chosen: Athlete[] = [];
+  const chosen: Array<{ athlete: Athlete; level: Tier }> = [];
   let women = 0;
 
-  for (const tier of TIERS as Tier[]) {
+  for (const level of TIERS) {
     const candidates = shuffle(
-      pool.filter((a) => a.tier === tier && !opts.exclude?.has(a.id)),
+      pool.filter((a) => levelOf(a) === level && !opts.exclude?.has(a.id)),
       rng,
     );
     const picks: Athlete[] = [];
@@ -117,30 +119,45 @@ export function generateItems(pool: Athlete[], rng: Rng, opts: GeneratorOptions 
     tryPick(true);
     if (picks.length < perTier) tryPick(false);
     if (picks.length < perTier) {
-      throw new Error(`Not enough tier ${tier} athletes in pool (need ${perTier}, have ${candidates.length})`);
+      throw new Error(`Not enough level ${level} athletes in pool (need ${perTier}, have ${candidates.length})`);
     }
-    chosen.push(...picks);
+    chosen.push(...picks.map((athlete) => ({ athlete, level })));
   }
 
-  return chosen.map((athlete, position) => ({ athlete, tier: athlete.tier, position }));
+  return chosen.map(({ athlete, level }, position) => ({ athlete, tier: level, position }));
 }
 
-export function dailyPuzzle(pool: Athlete[], dateET: string): Puzzle {
-  const rng = mulberry32(seedFromString(`collegian-daily-${dateET}`));
+function optionsFor(mode: ModeDef, pool: Athlete[]): GeneratorOptions {
+  const levels = levelMapFor(mode, pool);
+  return { womenBudget: mode.womenBudget, levelOf: (a) => levels.get(a.id) ?? a.tier };
+}
+
+const CLASSIC = MODES[0];
+
+export function dailyPuzzle(athletes: Athlete[], dateET: string, mode: ModeDef = CLASSIC): Puzzle {
+  const pool = poolForMode(mode, athletes);
+  // Classic keeps the original seed so puzzle history stays stable.
+  const seedKey = isClassic(mode) ? `collegian-daily-${dateET}` : `collegian-daily-${mode.id}-${dateET}`;
+  const rng = mulberry32(seedFromString(seedKey));
   return {
-    id: `daily-${dateET}`,
-    mode: "daily",
+    id: `daily-${mode.id}-${dateET}`,
+    kind: "daily",
+    mode: mode.id,
     dateET,
     number: puzzleNumberFor(dateET),
-    items: generateItems(pool, rng),
+    items: generateItems(pool, rng, optionsFor(mode, pool)),
   };
 }
 
-export function practicePuzzle(pool: Athlete[], seed: number = Math.floor(Math.random() * 2 ** 31)): Puzzle {
+export function practicePuzzle(athletes: Athlete[], mode: ModeDef = CLASSIC, seed: number = Math.floor(Math.random() * 2 ** 31)): Puzzle {
+  const pool = poolForMode(mode, athletes);
   const rng = mulberry32(seed);
   return {
-    id: `practice-${seed}`,
-    mode: "practice",
-    items: generateItems(pool, rng),
+    id: `practice-${mode.id}-${seed}`,
+    kind: "practice",
+    mode: mode.id,
+    items: generateItems(pool, rng, optionsFor(mode, pool)),
   };
 }
+
+export { CLASSIC_MODE_ID };
