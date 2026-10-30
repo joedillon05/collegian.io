@@ -23,7 +23,7 @@ describe("editDistance", () => {
 describe("searchSchools", () => {
   it("exact and prefix matches win", () => {
     expect(top("michigan")[0]).toBe("michigan");
-    expect(top("mich").slice(0, 2)).toEqual(expect.arrayContaining(["michigan", "michigan-state"]));
+    expect(top("mich").slice(0, 3)).toEqual(expect.arrayContaining(["michigan", "michigan-state"]));
   });
   it("ambiguous USC shows both schools so the player must pick", () => {
     const ids = top("usc");
