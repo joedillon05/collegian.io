@@ -1,0 +1,168 @@
+@import "tailwindcss";
+
+@theme {
+  --font-pixel: var(--font-pixel), "Courier New", monospace;
+  --font-body: var(--font-body), "Courier New", monospace;
+}
+
+:root {
+  --ink: #15152a;
+  --paper: #f1e6c8;
+  --bone: #f7f3e8;
+  --maize: #ffd23f;
+  --red: #e63946;
+  --green: #2dd36f;
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+  background: #0b0b14;
+  color: var(--bone);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 20px;
+  line-height: 1.2;
+  -webkit-font-smoothing: none;
+  overflow-x: hidden;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.02em;
+}
+
+/* ---- chunky panels & buttons (Krillion-style outlines) */
+.px-panel {
+  background: var(--paper);
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.px-panel-dark {
+  background: var(--ink);
+  color: var(--bone);
+  border: 4px solid var(--bone);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.6);
+}
+.px-btn {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  line-height: 1;
+  padding: 14px 18px;
+  border: 4px solid var(--ink);
+  background: var(--maize);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 60ms steps(2), box-shadow 60ms steps(2);
+  user-select: none;
+}
+.px-btn:hover {
+  filter: brightness(1.05);
+}
+.px-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--ink);
+}
+.px-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.px-btn-secondary {
+  background: var(--bone);
+}
+.px-btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ---- scene background */
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.scene-label {
+  font-family: var(--font-pixel);
+}
+.scene-enter {
+  animation: scene-in 0.75s steps(6) both;
+}
+@keyframes scene-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---- CRT scanlines */
+.scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0 1px, transparent 1px 3px);
+}
+
+/* ---- sprite animations */
+.anim-drift { animation: drift 16s ease-in-out infinite; }
+@keyframes drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-6px); } }
+.anim-twinkle { animation: twinkle 1.8s steps(2) infinite; }
+@keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+.anim-glow { animation: glow 2.2s steps(3) infinite; }
+@keyframes glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.anim-rise { animation: rise 8s linear infinite; }
+@keyframes rise { 0% { transform: translateY(0); opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(-22px); opacity: 0; } }
+.anim-smoke { animation: smoke 1.8s steps(4) infinite; }
+@keyframes smoke { 0% { transform: translateY(0); opacity: 0.9; } 100% { transform: translateY(-5px); opacity: 0; } }
+.anim-wave { animation: wave 1.1s steps(3) infinite; transform-origin: left center; transform-box: fill-box; }
+@keyframes wave { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.75); } }
+.anim-confetti { animation: confetti 5.5s linear infinite; }
+@keyframes confetti { 0% { transform: translateY(0); } 100% { transform: translateY(68px); } }
+
+/* ---- UI effects */
+.anim-shake { animation: shake 0.35s steps(8); }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+.flash-correct { animation: flash-correct 0.5s steps(4) forwards; }
+@keyframes flash-correct { 0% { background: rgba(45, 211, 111, 0.45); } 100% { background: transparent; } }
+.flash-wrong { animation: flash-wrong 0.45s steps(4) forwards; }
+@keyframes flash-wrong { 0% { background: rgba(230, 57, 70, 0.45); } 100% { background: transparent; } }
+.anim-pop { animation: pop 1s steps(10) forwards; }
+@keyframes pop {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  15% { transform: translateY(-6px) scale(1.15); opacity: 1; }
+  100% { transform: translateY(-64px) scale(1); opacity: 0; }
+}
+.anim-banner { animation: banner 1.7s steps(14) forwards; transform: translate(-50%, -50%); }
+@keyframes banner {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  12% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  22% { transform: translate(-50%, -50%) scale(1); }
+  85% { opacity: 1; }
+  100% { transform: translate(-50%, -60%) scale(1); opacity: 0; }
+}
+.anim-blink { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-drift, .anim-twinkle, .anim-glow, .anim-rise, .anim-smoke, .anim-wave, .anim-confetti,
+  .anim-shake, .anim-pop, .anim-banner, .anim-blink, .scene-enter {
+    animation: none !important;
+  }
+  .anim-banner { opacity: 1; }
+  .scanlines::after { display: none; }
+}
