@@ -1,7 +1,3 @@
-
-> collegian@0.1.0 import:wikidata
-> node --experimental-strip-types scripts/import-wikidata.ts
-
 wikidata_id,name,sport,tier_hint,school_wikidata_id,school_name,birth_year,gender,sitelinks
 Q6279,"Joe Biden",Football,1,Q617433,"Syracuse University",1942,m,278
 Q6279,"Joe Biden",Football,1,Q1068072,"University of Delaware",1942,m,278

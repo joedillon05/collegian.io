@@ -6,12 +6,21 @@ human-verified rows.
 
 ## Flow
 
-1. `scripts/import-wikidata.ts` pulls candidates from Wikidata into
-   `data/candidates.csv` (not committed; regenerate as needed).
-2. Review candidates into `data/curation.csv`. Rows with `verified` blank
-   never ship; `claude` means the row was drafted from Claude's knowledge and
-   still needs a human check; `human` means someone verified it against the
-   source URL.
+1. `npm run import:wikidata` pulls candidates from Wikidata into
+   `data/candidates.csv` (one row per athlete/school pair; regenerate as
+   needed). Each sport query requires an athlete occupation and a US school.
+2. `npm run match:candidates` resolves every candidate's school against
+   `src/data/schools.ts`, drops people already in `curation.csv`, merges the
+   athlete/school pairs into one row per person, suggests a `fame` from
+   Wikipedia sitelink rank within the sport, and writes `data/review.csv`
+   (same columns as curation plus `wikidata_id`, `birth_year`, `sitelinks`
+   and `unresolved_schools`). It also prints the most common unresolved
+   school names so you can add aliases or non-D1 entries.
+3. Review rows from `review.csv`, fill `league`, `number`, `active`, check
+   `tier`/`fame`, confirm the person actually competed for the school, set
+   `verified = human`, and paste them into `data/curation.csv`. Rows with
+   `verified` blank never ship; `claude` means drafted from Claude's
+   knowledge and still needing a human check.
 3. `npm run build:pool` validates every row (slug ids, unique ids and names,
    known school ids, tier 1-5, yes/no, m/f) and regenerates
    `src/data/athletes.generated.ts`. Commit the generated file.

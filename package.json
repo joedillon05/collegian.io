@@ -10,7 +10,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "build:pool": "node --experimental-strip-types scripts/build-pool.ts",
-    "import:wikidata": "node --experimental-strip-types scripts/import-wikidata.ts"
+    "import:wikidata": "node --experimental-strip-types scripts/import-wikidata.ts",
+    "match:candidates": "node --experimental-strip-types scripts/match-candidates.ts"
   },
   "dependencies": {
     "next": "16.4.3",

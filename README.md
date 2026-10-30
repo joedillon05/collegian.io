@@ -32,6 +32,8 @@ detect the Next.js app at the repo root.
 - `src/lib/search.ts` — fuzzy school autocomplete
 - `src/lib/grading.ts` — letter grades and GPA
 - `src/lib/pixelart.ts` — procedural stage backgrounds
+- `src/lib/modes.ts` — Classic and sport modes, fame buckets
 - `src/data/schools.ts`, `src/data/athletes.ts` — datasets
+- `data/`, `scripts/` — curation CSV, Wikidata import, candidate matcher, pool builder
 - `src/components/` — Home, Game, Results, modals
 - `placeholder/` — static coming-soon page currently deployed

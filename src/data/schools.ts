@@ -401,6 +401,26 @@ const D1: Row[] = [
   ["ut-arlington", "UT Arlington", "University of Texas at Arlington", "TX", ["UTA", "Texas Arlington", "Mavericks"]],
   // D1 in lacrosse only
   ["johns-hopkins", "Johns Hopkins", "Johns Hopkins University", "MD", ["JHU", "Hopkins", "Blue Jays"]],
+  // D1 in hockey only (NCHC, CCHA, ECAC, Atlantic Hockey)
+  ["minnesota-duluth", "Minnesota Duluth", "University of Minnesota Duluth", "MN", ["UMD", "Duluth", "Bulldogs"]],
+  ["st-cloud-state", "St. Cloud State", "St. Cloud State University", "MN", ["Saint Cloud State", "SCSU", "Huskies"]],
+  ["minnesota-state", "Minnesota State", "Minnesota State University, Mankato", "MN", ["Minnesota State Mankato", "Mankato", "Mavericks"]],
+  ["bemidji-state", "Bemidji State", "Bemidji State University", "MN", ["Beavers"]],
+  ["michigan-tech", "Michigan Tech", "Michigan Technological University", "MI", ["Michigan Technological", "Huskies"]],
+  ["northern-michigan", "Northern Michigan", "Northern Michigan University", "MI", ["NMU", "Wildcats"]],
+  ["lake-superior-state", "Lake Superior State", "Lake Superior State University", "MI", ["LSSU", "Lakers"]],
+  ["ferris-state", "Ferris State", "Ferris State University", "MI", ["Bulldogs"]],
+  ["clarkson", "Clarkson", "Clarkson University", "NY", ["Golden Knights"]],
+  ["st-lawrence", "St. Lawrence", "St. Lawrence University", "NY", ["Saint Lawrence", "Saints"]],
+  ["union", "Union", "Union College", "NY", ["Union College", "Garnet Chargers", "Dutchmen"]],
+  ["rpi", "RPI", "Rensselaer Polytechnic Institute", "NY", ["Rensselaer", "Engineers"]],
+  ["rit", "RIT", "Rochester Institute of Technology", "NY", ["Rochester Institute", "Tigers"]],
+  ["colorado-college", "Colorado College", "Colorado College", "CO", ["CC", "Tigers"]],
+  ["bentley", "Bentley", "Bentley University", "MA", ["Falcons"]],
+  ["american-international", "American International", "American International College", "MA", ["AIC", "Yellow Jackets"]],
+  ["alaska-fairbanks", "Alaska Fairbanks", "University of Alaska Fairbanks", "AK", ["Alaska", "UAF", "Nanooks"]],
+  ["alaska-anchorage", "Alaska Anchorage", "University of Alaska Anchorage", "AK", ["UAA", "Seawolves"]],
+  ["augustana-sd", "Augustana (SD)", "Augustana University", "SD", ["Augustana", "Vikings"]],
 ];
 
 // Non-D1 schools exist only because an athlete in the pool competed there.
